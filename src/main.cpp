@@ -1,48 +1,18 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
+void printEnvironmentInfo();
 void printImg(cv::Mat to_print, std::string msg);
-
-void printEnvironmentInfo() {
-    std::cout << "------------------------------------\n";
-    std::cout << "   Runtime Environment Information   \n";
-    std::cout << "------------------------------------\n";
-    std::cout << "OpenCV version : " << CV_VERSION << "\n";
-
-#if defined(__clang__)
-    std::cout << "Compiler        : Clang " 
-              << __clang_major__ << "." << __clang_minor__ << "\n";
-#elif defined(__GNUC__)
-    std::cout << "Compiler        : GCC " 
-              << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "\n";
-#elif defined(_MSC_VER)
-    std::cout << "Compiler        : MSVC " << _MSC_VER << "\n";
-#else
-    std::cout << "Compiler        : Unknown\n";
-#endif
-
-    std::cout << "C++ standard    : ";
-#if __cplusplus == 199711L
-    std::cout << "C++98\n";
-#elif __cplusplus == 201103L
-    std::cout << "C++11\n";
-#elif __cplusplus == 201402L
-    std::cout << "C++14\n";
-#elif __cplusplus == 201703L
-    std::cout << "C++17\n";
-#elif __cplusplus == 202002L
-    std::cout << "C++20\n";
-#elif __cplusplus > 202002L
-    std::cout << "C++23 or newer\n";
-#else
-    std::cout << "Unknown (" << __cplusplus << ")\n";
-#endif
-
-    std::cout << "------------------------------------\n\n";
-}
+double point_distance(const cv::Point& a, const cv::Point& b);
+cv::Point median_point(const cv::Point& a, const cv::Point& b);
+void assign_red_cone(cv::Point& red_cone, const cv::Point& new_cone, const int selected_cone);
+cv::Point get_circuit_point(const cv::Point& current_cone, std::vector <cv::Point>& other_side_cones);
+void sortCircuitPoints(const cv::Point& starting_point,std::vector<cv::Point>& circuit_points);
+void drawCircuit(cv::Mat& image, const std::vector<cv::Point>& circuit_points);
 
 // Public paths for images 
 const std::string image_1 = "../src/data/frame_1.png";
@@ -86,15 +56,23 @@ const cv::Scalar upper_black2(180, 70, 70); //195
 // Constants for image processing
 int bgr2hsv = cv::COLOR_BGR2HSV;
 
-int processing_itrations = 10;
-int white_index = 0;
-int light_black_index = 1;
-int dark_black_index = 2;
-int light_red_index = 3;
-int make_close = cv::MORPH_CLOSE;
-int make_open = cv::MORPH_OPEN;
+const int left_red_cone_selected = 0;
+const int right_red_cone_selected = 1;
+const int processing_itrations = 10;
+const int white_index = 0;
+const int light_black_index = 1;
+const int dark_black_index = 2;
+const int red_index = 3;
+const int blue_index = 4;
+const int yellow_index = 5;
 cv::Mat strong_kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)); // best one so far
 cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)); // best one so far
+cv::Point invalid_point = cv::Point(-1,-1);
+cv::Point leftmost_red_cone = cv::Point(-1,-1);
+cv::Point rightmost_red_cone = cv::Point(-1,-1);
+std::vector <cv::Point> blue_cones;
+std::vector <cv::Point> yellow_cones;
+std::vector <cv::Point> circuit_points;
 
 int main() {
 
@@ -148,29 +126,38 @@ int main() {
         cv::inRange(hsv_frame_1, bounds.first, bounds.second, frames_cones_color[i]); 
         
         // Tune the current mask with another one in order to combine different colors to create the best profile for the cones
-        if(i == 2)
+        if( i > 1 )
         {
-            cv::bitwise_or(frames_cones_color[i], frames_cones_color[1], frames_cones_color[i]);
+            switch (i)
+            {
+                case dark_black_index:
+                    cv::bitwise_or(frames_cones_color[i], frames_cones_color[1], frames_cones_color[i]);
+                break;
+
+                case red_index:
+                    cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
+                    cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
+                break;
+
+                case blue_index:
+                    cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
+                    cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
+                break;
+
+                case yellow_index:
+                    cv::bitwise_or(frames_cones_color[i], frames_cones_color[dark_black_index], frames_cones_color[i]);
+                    cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
+                break;
+
+                default:
+                    cout <<"No color tuning needed" <<endl;
+                break;
+            }
         }
-        if (i == 3)
-        {
-            cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
-            cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
-        }
-        if(i == 4)
-        {
-            cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
-            cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
-        }
-        
-        if(i == 5)
-        {
-            cv::bitwise_or(frames_cones_color[i], frames_cones_color[dark_black_index], frames_cones_color[i]);
-            cv::dilate(frames_cones_color[i], frames_cones_color[i], strong_kernel);
-        }
+
         // Join adjacent areas
-        cv::morphologyEx(frames_cones_color[i], frames_cones_color[i], make_close, strong_kernel);
-        cv::morphologyEx(frames_cones_color[i], frames_cones_color[i], make_open, kernel);
+        cv::morphologyEx(frames_cones_color[i], frames_cones_color[i], cv::MORPH_CLOSE, strong_kernel);
+        cv::morphologyEx(frames_cones_color[i], frames_cones_color[i], cv::MORPH_OPEN, kernel);
 
         // Fill black areas inside contours using another mask
         cv::Mat im_floodfill = frames_cones_color[i].clone();
@@ -228,18 +215,166 @@ int main() {
                         if ( (blue_ratio > 0.1 || yellow_ratio > 0.1 || red_ratio > 0.1) && white_ratio < 0.1 ) {
                             cv::rectangle(frame_1, box, bounds.first, 2);
                             //printImg(frame_1,"cones detected so far");
+                            cv::Point new_cone = cv::Point( box.x + (box.width / 2), box.y + (box.height / 2) ); // creating the coordinates of the new cones corresponding to the ones of the center of the already drawn box
+                            
+                            // Storing and classifying the new cone in order to use its coordinates to detect the circuit in the next level
+                            switch (i)
+                            {
+                                case red_index: // checking if the new red cone is the left most or right most
+                                    assign_red_cone(leftmost_red_cone, new_cone ,left_red_cone_selected);
+                                    assign_red_cone(rightmost_red_cone, new_cone ,right_red_cone_selected);
+                                break;
+                                
+                                case blue_index:
+                                    blue_cones.push_back(new_cone);
+                                break;
+                                
+                                case yellow_index:
+                                    yellow_cones.push_back(new_cone);
+                                break;
+                                
+                                default:
+                                    cout <<"Unknown item detected" <<endl;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
     }
+
     printImg(frame_1,"Cones detected");
+
+    // Level 4: detect circuit
+
+    // Detect the point of the circuit by calculating the median point between the current blue/yellow cone with the closest one on the other side
+
+    cv::Point starting_point = median_point(leftmost_red_cone, rightmost_red_cone);
+    circuit_points.push_back(starting_point);
+    for(size_t i = 0; i < blue_cones.size(); i++)
+    {
+        cv::Point new_circuit_point = get_circuit_point(blue_cones[i], yellow_cones);
+        circuit_points.push_back(new_circuit_point);
+    }
+
+    for(size_t i = 0; i < yellow_cones.size(); i++)
+    {
+        cv::Point new_circuit_point = get_circuit_point(yellow_cones[i], blue_cones);
+        circuit_points.push_back(new_circuit_point);
+    }
+    
+    // Sort the points of the circuit based on how close they are to a starting point
+
+    sortCircuitPoints(starting_point, circuit_points);
+    drawCircuit(frame_1,circuit_points);
+    printImg(frame_1, "Circuit detected");
+
     return default_val;
+}
+
+void printEnvironmentInfo() {
+    std::cout << "------------------------------------\n";
+    std::cout << "   Runtime Environment Information   \n";
+    std::cout << "------------------------------------\n";
+    std::cout << "OpenCV version : " << CV_VERSION << "\n";
+
+    #if defined(__clang__)
+            std::cout << "Compiler        : Clang " 
+                << __clang_major__ << "." << __clang_minor__ << "\n";
+    #elif defined(__GNUC__)
+        std::cout << "Compiler        : GCC " 
+                << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__ << "\n";
+    #elif defined(_MSC_VER)
+        std::cout << "Compiler        : MSVC " << _MSC_VER << "\n";
+    #else
+        std::cout << "Compiler        : Unknown\n";
+    #endif
+
+        std::cout << "C++ standard    : ";
+    #if __cplusplus == 199711L
+        std::cout << "C++98\n";
+    #elif __cplusplus == 201103L
+        std::cout << "C++11\n";
+    #elif __cplusplus == 201402L
+        std::cout << "C++14\n";
+    #elif __cplusplus == 201703L
+        std::cout << "C++17\n";
+    #elif __cplusplus == 202002L
+        std::cout << "C++20\n";
+    #elif __cplusplus > 202002L
+        std::cout << "C++23 or newer\n";
+    #else
+        std::cout << "Unknown (" << __cplusplus << ")\n";
+    #endif
+        std::cout << "------------------------------------\n\n";
 }
 
 void printImg(cv::Mat to_print, std::string msg)
 {
     cv::imshow(msg, to_print);
     cv::waitKey(default_val);
+}
+
+double point_distance(const cv::Point& a, const cv::Point& b) {
+    return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+}
+
+cv::Point median_point(const cv::Point& a, const cv::Point& b) {
+    return cv::Point((a.x + b.x) / 2, (a.y + b.y) / 2);
+}
+
+void assign_red_cone(cv::Point& red_cone, const cv::Point& new_cone, const int selected_cone) {
+    if( selected_cone == left_red_cone_selected && ( (red_cone.x == invalid_point.x && red_cone.y == invalid_point.y) || (red_cone.x > new_cone.x) ) ) // unassigned cone
+    {
+        red_cone.x = new_cone.x;
+        red_cone.y = new_cone.y;
+    }
+    else if( selected_cone == right_red_cone_selected && ( (red_cone.x == invalid_point.x && red_cone.y == invalid_point.y) || (red_cone.x < new_cone.x) ) )
+    {
+        red_cone.x = new_cone.x;
+        red_cone.y = new_cone.y;
+    }   
+}
+
+cv::Point get_circuit_point(const cv::Point& current_cone, std::vector <cv::Point>& other_side_cones)
+{
+    if (other_side_cones.empty())
+    {
+        return current_cone;
+    }
+    cv::Point closest_cone = other_side_cones[0];
+    double best_len = point_distance(current_cone, other_side_cones[0]);
+    double current_len;
+    for(size_t i = 1; i < other_side_cones.size(); i++)
+    {
+        current_len = point_distance(current_cone, other_side_cones[i]);
+        if (current_len < best_len)
+        {
+            closest_cone = other_side_cones[i];
+            best_len = current_len;
+        }
+    }
+    return median_point(current_cone, closest_cone);
+}
+
+// Sort the points of the circuit considering first the ones with a bigger x value, eventually sorting considering  y value
+
+void sortCircuitPoints(const cv::Point& starting_point,std::vector<cv::Point>& circuit_points) {
+    std::sort(circuit_points.begin(), circuit_points.end(),
+              [&starting_point](const cv::Point& a, const cv::Point& b) {
+                  return point_distance(a,starting_point) > point_distance(b, starting_point);          
+              });
+}
+
+void drawCircuit(cv::Mat& image, const std::vector<cv::Point>& circuit_points) {
+    // Drawing every point as a circle
+    for (const auto& pt : circuit_points) {
+        cv::circle(image, pt, 5, cv::Scalar(0, 0, 255), -1); // rosso, riempito
+    }
+
+    // Joining points with lines
+    for (size_t i = 1; i < circuit_points.size(); ++i) {
+        cv::line(image, circuit_points[i-1], circuit_points[i], cv::Scalar(255, 0, 0), 2); // blu, spessore 2
+    }
 }
