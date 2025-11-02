@@ -378,3 +378,5 @@ void drawCircuit(cv::Mat& image, const std::vector<cv::Point>& circuit_points) {
         cv::line(image, circuit_points[i-1], circuit_points[i], cv::Scalar(255, 0, 0), 2); // blu, spessore 2
     }
 }
+
+
