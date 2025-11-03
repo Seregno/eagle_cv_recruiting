@@ -2,6 +2,9 @@
 #include <iostream>
 #include <vector>
 
+const std::string image_1 = "../src/data/frame_1.png";
+const std::string image_2 = "../src/data/frame_2.png";
+
 void onMouse(int event, int x, int y, int, void* userdata) {
     if (event == cv::EVENT_LBUTTONDOWN) {
         cv::Mat* hsv = reinterpret_cast<cv::Mat*>(userdata);
@@ -11,7 +14,7 @@ void onMouse(int event, int x, int y, int, void* userdata) {
 }
 
 int main() {
-    cv::Mat image = cv::imread("../src/data/frame_1.png");
+    cv::Mat image = cv::imread(image_2);
     cv::Mat hsv;
     cv::cvtColor(image, hsv, cv::COLOR_BGR2HSV);
 
