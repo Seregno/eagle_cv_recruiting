@@ -13,6 +13,7 @@ void assign_red_cone(cv::Point& red_cone, const cv::Point& new_cone, const int s
 cv::Point get_circuit_point(const cv::Point& current_cone, std::vector <cv::Point>& other_side_cones);
 void sortCircuitPoints(const cv::Point& starting_point,std::vector<cv::Point>& circuit_points);
 void drawCircuit(cv::Mat& image, const std::vector<cv::Point>& circuit_points);
+void pose_estimation();
 
 // Public paths for images 
 const std::string image_1 = "../src/data/frame_1.png";
@@ -53,9 +54,6 @@ const cv::Scalar upper_black1(20, 255, 100); //255
 const cv::Scalar lower_black2(160, 40, 50); 
 const cv::Scalar upper_black2(180, 70, 70); //195
 
-// Constants for image processing
-int bgr2hsv = cv::COLOR_BGR2HSV;
-
 const int point_for_orb = 2000;
 const int left_red_cone_selected = 0;
 const int right_red_cone_selected = 1;
@@ -66,7 +64,7 @@ const int dark_black_index = 2;
 const int red_index = 3;
 const int blue_index = 4;
 const int yellow_index = 5;
-cv::Mat strong_kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)); // best one so far
+cv::Mat strong_kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7, 7)); // best one so far
 cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)); // best one so far
 cv::Point invalid_point = cv::Point(-1,-1);
 cv::Point leftmost_red_cone = cv::Point(-1,-1);
@@ -88,7 +86,8 @@ int main() {
     printEnvironmentInfo();
 
     // Level 1: load and display the image 
-    cv::Mat frame_1 = cv::imread(image_1);
+
+    cv::Mat frame_1 = cv::imread(image_2);
     if (frame_1.empty()) {
         std::cerr << "Image not found!\n";
         return image_not_found;
@@ -281,60 +280,7 @@ int main() {
 
     // Level 5: Odometry and Pose estimation
 
-    // Opening the two clean images
-    cv::Mat frame_1_clean = cv::imread(image_1);
-    cv::Mat frame_2_clean = cv::imread(image_2);
-    
-    // Instantiating orb
-    cv::Ptr<cv::ORB> orb = cv::ORB::create(point_for_orb);
-
-    // Instantiating data structures to memorize the features
-    std::vector<cv::KeyPoint> keypoints1, keypoints2;
-    cv::Mat descriptors1, descriptors2;
-
-    // Detecting features from the frames
-    orb->detectAndCompute(frame_1_clean, cv::noArray(), keypoints1, descriptors1);
-    orb->detectAndCompute(frame_2_clean, cv::noArray(), keypoints2, descriptors2);
-
-    // Instantiating a Brute Force Matcher in order to get the similarity between the most significant points of the two frames
-    cv::BFMatcher matcher(cv::NORM_HAMMING);
-    std::vector<cv::DMatch> matches;
-    matcher.match(descriptors1, descriptors2, matches);
-
-    // Filtering the matches
-
-    double max_dist = 0; double min_dist = 100;
-    for (auto& m : matches) {
-        double dist = m.distance;
-        min_dist = std::min(min_dist, dist);
-        max_dist = std::max(max_dist, dist);
-    }
-    std::vector<cv::DMatch> good_matches;
-    for (auto& m : matches) {
-        if (m.distance <= std::max(2 * min_dist, 30.0))
-            good_matches.push_back(m);
-    }
-
-    // Converting keypoints into 2D points
-
-    std::vector<cv::Point2f> pts1, pts2;
-    for (auto& m : good_matches) {
-        pts1.push_back(keypoints1[m.queryIdx].pt);
-        pts2.push_back(keypoints2[m.trainIdx].pt);
-    }
-
-    // Calculating the essential matrix using the essential matrix
-
-    cv::Mat E = cv::findEssentialMat(pts1, pts2, K, cv::RANSAC, 0.999, 1.0);
-
-    // Getting the pose (R, t)
-    cv::Mat R, t;
-    int inliers = cv::recoverPose(E, pts1, pts2, K, R, t);
-
-    // Printing the results:
-
-    std::cout << "Rotation:\n" << R << std::endl;
-    std::cout << "Translation:\n" << t << std::endl;
+    pose_estimation();
 
     return default_val;
 }
@@ -445,4 +391,71 @@ void drawCircuit(cv::Mat& image, const std::vector<cv::Point>& circuit_points) {
     }
 }
 
+void pose_estimation()
+{
+    // Opening the two clean images
+    cv::Mat frame_1_clean = cv::imread(image_1);
+    cv::Mat frame_2_clean = cv::imread(image_2);
+    
+    // Checking if the two frames have been read correctly
+    if (frame_2_clean.empty()) {
+        std::cerr << "Frame 1 not found!\n";
+        return;
+    }
 
+    if (frame_2_clean.empty()) {
+        std::cerr << "Frame 2 not found!\n";
+        return;
+    }
+
+    // Instantiating orb
+    cv::Ptr<cv::ORB> orb = cv::ORB::create(point_for_orb);
+
+    // Instantiating data structures to memorize the features
+    std::vector<cv::KeyPoint> keypoints1, keypoints2;
+    cv::Mat descriptors1, descriptors2;
+
+    // Detecting features from the frames
+    orb->detectAndCompute(frame_1_clean, cv::noArray(), keypoints1, descriptors1);
+    orb->detectAndCompute(frame_2_clean, cv::noArray(), keypoints2, descriptors2);
+
+    // Instantiating a Brute Force Matcher in order to get the similarity between the most significant points of the two frames
+    cv::BFMatcher matcher(cv::NORM_HAMMING);
+    std::vector<cv::DMatch> matches;
+    matcher.match(descriptors1, descriptors2, matches);
+
+    // Filtering the matches
+
+    double max_dist = 0; double min_dist = 100;
+    for (auto& m : matches) {
+        double dist = m.distance;
+        min_dist = std::min(min_dist, dist);
+        max_dist = std::max(max_dist, dist);
+    }
+    std::vector<cv::DMatch> good_matches;
+    for (auto& m : matches) {
+        if (m.distance <= std::max(2 * min_dist, 30.0))
+            good_matches.push_back(m);
+    }
+
+    // Converting keypoints into 2D points
+
+    std::vector<cv::Point2f> pts1, pts2;
+    for (auto& m : good_matches) {
+        pts1.push_back(keypoints1[m.queryIdx].pt);
+        pts2.push_back(keypoints2[m.trainIdx].pt);
+    }
+
+    // Calculating the essential matrix using the essential matrix
+
+    cv::Mat E = cv::findEssentialMat(pts1, pts2, K, cv::RANSAC, 0.999, 1.0);
+
+    // Getting the pose (R, t)
+    cv::Mat R, t;
+    int inliers = cv::recoverPose(E, pts1, pts2, K, R, t);
+
+    // Printing the results:
+
+    std::cout << "Rotation:\n" << R << std::endl;
+    std::cout << "Translation:\n" << t << std::endl;
+}
