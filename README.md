@@ -32,7 +32,6 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
 
 Una volta compilato il procetto con il comando "make", apparirà un altro file, chiamato "./color_detection". Si tratta di un piccolo applicativo realizzato al volo e utilizzato per fare tuning sui colori, al fine di restringere il più possibile i range delle componenti di ogni cono e tagliare aree superflue per lo svolgimento dell'esercizio.
 
-=======
 
 
 
