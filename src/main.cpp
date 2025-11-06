@@ -487,7 +487,7 @@ void pose_estimation()
         pts2.push_back(keypoints2[m.trainIdx].pt);
     }
 
-    // Calculating the essential matrix using the essential matrix
+    // Calculating the pose matrix using the essential matrix
 
     cv::Mat E = cv::findEssentialMat(pts1, pts2, K, cv::RANSAC, 0.999, 1.0);
 
@@ -498,5 +498,5 @@ void pose_estimation()
     // Printing the results:
 
     std::cout << "Rotation:\n" << R << std::endl;
-    std::cout << "Translation:\n" << t << std::endl;
+    std::cout << "Traslation:\n" << t << std::endl;
 }

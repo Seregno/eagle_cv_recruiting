@@ -1,4 +1,0 @@
-/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/cone_detector.dir
-/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/color_detector.dir
-/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/edit_cache.dir
-/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/rebuild_cache.dir

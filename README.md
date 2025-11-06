@@ -21,9 +21,10 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
 
 ---
 
-'''bash
-mkdir build && cd build
-cmake ..
-make
-./cone_detector
-'''
+<pre> 
+    ``` 
+        mkdir build && cd build 
+        cmake .. make 
+        ./cone_detector 
+    ``` 
+</pre>
