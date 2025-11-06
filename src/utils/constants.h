@@ -6,18 +6,14 @@
 #include <vector>
 #include <string>
 
-// ─────────────────────────────────────────────
-//  PATHS & ERROR CODES
-// ─────────────────────────────────────────────
+//  Paths of the images
 extern const std::string image_1;
 extern const std::string image_2;
 
 extern const int image_not_found;
 extern const int default_val;
 
-// ─────────────────────────────────────────────
-//  COLOR BOUNDS
-// ─────────────────────────────────────────────
+// color bounds 
 extern const cv::Scalar lower_red1;
 extern const cv::Scalar upper_red1;
 extern const cv::Scalar lower_red2;
@@ -33,15 +29,11 @@ extern const cv::Scalar upper_black1;
 extern const cv::Scalar lower_black2;
 extern const cv::Scalar upper_black2;
 
-// ─────────────────────────────────────────────
-//  COLOR VECTORS
-// ─────────────────────────────────────────────
+//  vectors for names and pair of bounds for colors
 extern const std::vector<std::string> color_names;
 extern const std::vector<std::pair<cv::Scalar, cv::Scalar>> color_bounds;
 
-// ─────────────────────────────────────────────
-//  CONSTANTS AND PARAMETERS
-// ─────────────────────────────────────────────
+//  Constants for geometrical filter and barycenter of the boxes of the red cones
 extern const double main_color_bound;
 extern const double secondary_color_bound;
 extern const int point_for_orb;
@@ -56,20 +48,16 @@ constexpr const int red_index = 3;
 constexpr const int blue_index = 4;
 constexpr const int yellow_index = 5;
 
-// ─────────────────────────────────────────────
-//  KERNELS
-// ─────────────────────────────────────────────
+//  Kernels for image processing
 extern const cv::Mat kernel_9;
 extern const cv::Mat kernel_7;
 extern const cv::Mat kernel_5;
 extern const cv::Mat kernel_3;
 
-// ─────────────────────────────────────────────
-//  OTHER CONSTANTS
-// ─────────────────────────────────────────────
+// invalid point for quick point initialization
 extern const cv::Point invalid_point;
 
-//  Essential matrix (camera intrinsics)
+//  Essential matrix for level 5
 extern cv::Mat K;
 
-#endif // CONSTANTS_H
+#endif 
