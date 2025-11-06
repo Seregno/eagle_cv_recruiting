@@ -10,7 +10,7 @@ I punti implementati sono i seguenti:
 4. Extraction of Track Edges
 5. Pose Estimation
 
-I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e come esse sono state superate e possibili miglioramenti sono reperibili all'interno del [report tecnico](docs/Technical_Report.pdf).
+I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e come esse sono state superate e possibili miglioramenti sono reperibili all'interno del [report tecnico](docs/Technical_report.pdf).
 
 ---
 
@@ -62,3 +62,4 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
     ``` 
 </pre>
 >>>>>>> 55d7e0dabcb662f4986634f30415445e0e7e3ca8
+
