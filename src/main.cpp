@@ -3,8 +3,6 @@
 #include <vector>
 #include <algorithm>
 
-// Before working: cd /mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/build
-
 using namespace std;
 
 void printEnvironmentInfo();
