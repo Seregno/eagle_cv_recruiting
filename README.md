@@ -24,11 +24,14 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
 <pre> 
     ``` 
         mkdir build && cd build 
-        cmake .. make 
+        cmake .. 
+        make 
         ./cone_detector 
     ``` 
-
 </pre>
+
+Una volta compilato il procetto con il comando "make", apparirà un altro file, chiamato "./color_detection". Si tratta di un piccolo applicativo realizzato al volo e utilizzato per fare tuning sui colori, al fine di restringere il più possibile i range delle componenti di ogni cono e tagliare aree superflue per lo svolgimento dell'esercizio.
+
 =======
 # SW Driverless – Cone Detection & Track Estimation
 
@@ -60,7 +63,7 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
     ./cone_detector 
     ``` 
 </pre>
->>>>>>> 55d7e0dabcb662f4986634f30415445e0e7e3ca8
+
 
 
 
