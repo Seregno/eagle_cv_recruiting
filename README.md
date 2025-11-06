@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # SW Driverless – Cone Detection & Track Estimation
 
 Realizzazione della task di recruiting per il team Eagle nell'area driverless della sezione software. 
@@ -62,6 +61,7 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
     ``` 
 </pre>
 >>>>>>> 55d7e0dabcb662f4986634f30415445e0e7e3ca8
+
 
 
 
