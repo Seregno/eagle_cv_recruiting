@@ -1,4 +1,4 @@
-# 🏎️ SW Driverless – Cone Detection & Track Estimation
+# SW Driverless – Cone Detection & Track Estimation
 
 Realizzazione della task di recruiting per il team Eagle nell'area driverless della sezione software. 
 I punti implementati sono i seguenti:
@@ -13,12 +13,18 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
 
 ---
 
-## ⚙️ Requisiti
+## Requisiti
 
 - **C++17** o superiore  
 - **CMake >= 3.10**  
 - **OpenCV >= 4.5**
 
 ---
-
-<pre> ```bash mkdir build && cd build cmake .. make ./cone_detector ``` </pre>
+## Setup/uso dell'applicazione
+<pre> 
+    ``` 
+        mkdir build && cd build 
+        cmake .. make 
+        ./cone_detector 
+    ``` 
+</pre>
