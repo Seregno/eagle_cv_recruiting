@@ -6,9 +6,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenCV REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS} include)
+include_directories(
+    ${OpenCV_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}/include
+    ${OpenCV_INCLUDE_DIRS}/src/utils
+)
 
-add_executable(cone_detector src/main.cpp)
+add_executable(cone_detector 
+    src/utils/constants.cpp
+    src/utils/processing.cpp    
+    src/main.cpp
+)
+
 target_link_libraries(cone_detector ${OpenCV_LIBS})
 
 add_executable(color_detector src/color_detector.cpp)
