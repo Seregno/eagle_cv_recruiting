@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/src/color_detector.cpp" "CMakeFiles/color_detector.dir/src/color_detector.cpp.o" "gcc" "CMakeFiles/color_detector.dir/src/color_detector.cpp.o.d"
+  "/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/src/color_detector.cpp" "CMakeFiles/color_detector.dir/src/color_detector.cpp.o" "gcc" "CMakeFiles/color_detector.dir/src/color_detector.cpp.o.d"
   )
 
 # Targets to which this target links.

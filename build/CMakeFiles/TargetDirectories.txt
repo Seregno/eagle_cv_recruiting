@@ -1,4 +1,4 @@
-/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/build/CMakeFiles/cone_detector.dir
-/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/build/CMakeFiles/color_detector.dir
-/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/build/CMakeFiles/rebuild_cache.dir
+/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/cone_detector.dir
+/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/color_detector.dir
+/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/edit_cache.dir
+/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/build/CMakeFiles/rebuild_cache.dir

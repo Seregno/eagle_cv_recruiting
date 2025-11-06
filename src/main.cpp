@@ -142,10 +142,14 @@ int main() {
 
         // Extract the current color
         cv::inRange(hsv_frame_1, bounds.first, bounds.second, frames_cones_color[i]); 
-        
+
         // Tune the current mask with another one in order to combine different colors to create the best profile for the cones
-        if( i > 1 )
+        if( i > dark_black_index )
         {
+                cv::Scalar main_color_lower_bound;
+                cv::Scalar main_color_upper_bound;
+                cv::Scalar secondary_color_lower_bound;
+                cv::Scalar secondary_color_upper_bound;
             switch (i)
             {
                 case dark_black_index:
@@ -156,84 +160,65 @@ int main() {
                     cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
                     cv::GaussianBlur(frames_cones_color[i], frames_cones_color[i], cv::Size(5,5), 0);
                     processConeMask(frames_cones_color[i], kernel_5, kernel_5, kernel_3); // 5  5 3
+
+                    // Setting bounding for cones size and colors
+                    bounding_area = 150;
+                    main_color_lower_bound = color_bounds[red_index].first;
+                    main_color_upper_bound = color_bounds[red_index].second;
+                    secondary_color_lower_bound = color_bounds[white_index].first;
+                    secondary_color_upper_bound = color_bounds[white_index].second;
                 break;
 
                 case blue_index:
                     cv::bitwise_or(frames_cones_color[i], frames_cones_color[white_index], frames_cones_color[i]);
                     cv::GaussianBlur(frames_cones_color[i], frames_cones_color[i], cv::Size(5,5), 0);
                     processConeMask(frames_cones_color[i], kernel_5, kernel_9, kernel_3); // standard is 5, 5, 3
+
+                    // Setting bounding for cones size and colors
+                    bounding_area = 10;
+                    main_color_lower_bound = color_bounds[blue_index].first;
+                    main_color_upper_bound = color_bounds[blue_index].second;
+                    secondary_color_lower_bound = color_bounds[white_index].first;
+                    secondary_color_upper_bound = color_bounds[white_index].second;  
                 break;
 
                 case yellow_index:
                     cv::bitwise_or(frames_cones_color[i], frames_cones_color[dark_black_index], frames_cones_color[i]);
                     //cv::medianBlur(frames_cones_color[i], frames_cones_color[i], 3);
                     processConeMask(frames_cones_color[i], kernel_5, kernel_5, kernel_3); // standard is 5, 5, 3
+
+                    // Setting bounding for cones size and colors
+                    bounding_area = 10;
+                    main_color_lower_bound = color_bounds[yellow_index].first;
+                    main_color_upper_bound = color_bounds[yellow_index].second;
+                    secondary_color_lower_bound = color_bounds[dark_black_index].first;
+                    secondary_color_upper_bound = color_bounds[dark_black_index].second;
                 break;
 
                 default:
                     cout <<"No color tuning needed" <<endl;
                 break;
             }
-        }
 
-        // Hierarchy declaration for contours and copying the mask to further improve the pipeline
-        std::vector<cv::Vec4i> hierarchy;
+            std::vector<cv::Vec4i> hierarchy;
 
-        // Find the contours of the white areas
-        cv::findContours(frames_cones_color[i], colors_contours[i], hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+            // Find the contours of the white areas
+            cv::findContours(frames_cones_color[i], colors_contours[i], hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-        if(i > dark_black_index)
-        {
-            //printImg(frames_cones_color[i], color_names[i]); 
             for (const auto& contour : colors_contours[i]) {
+
+                // Initializing variables for the approximation of the contour
                 std::vector<cv::Point> approx;
                 double epsilon = 0.02 * cv::arcLength(contour, true); 
                 cv::approxPolyDP(contour, approx, epsilon, true);
 
+                // Check if the shape is similar to a triangle
                 if (approx.size() >= 3 && approx.size() <= 9) {
-                    // Check if the shape is similar to a triangle
 
+                    // Initializing geometrical information
                     double area = cv::contourArea(contour);
                     cv::Rect box = cv::boundingRect(contour);
                     double aspectRatio = (double)box.width / box.height;
-                    
-                    cv::Scalar main_color_lower_bound;
-                    cv::Scalar main_color_upper_bound;
-                    cv::Scalar secondary_color_lower_bound;
-                    cv::Scalar secondary_color_upper_bound;
-
-                    switch(i)
-                    {
-                        case red_index:
-                            bounding_area = 150;
-                            main_color_bound = 0.1;
-                            secondary_color_bound = 0.1;
-                            main_color_lower_bound = color_bounds[red_index].first;
-                            main_color_upper_bound = color_bounds[red_index].second;
-                            secondary_color_lower_bound = color_bounds[white_index].first;
-                            secondary_color_upper_bound = color_bounds[white_index].second;
-                        break;
-
-                        case blue_index:
-                            bounding_area = 10;
-                            main_color_bound = 0.05;
-                            secondary_color_bound = 0.1;
-                            main_color_lower_bound = color_bounds[blue_index].first;
-                            main_color_upper_bound = color_bounds[blue_index].second;
-                            secondary_color_lower_bound = color_bounds[white_index].first;
-                            secondary_color_upper_bound = color_bounds[white_index].second;                        
-                        break;
-
-                        case yellow_index:
-                            bounding_area = 10;
-                            main_color_bound = 0.1;
-                            secondary_color_bound = 0.1;
-                            main_color_lower_bound = color_bounds[yellow_index].first;
-                            main_color_upper_bound = color_bounds[yellow_index].second;
-                            secondary_color_lower_bound = color_bounds[dark_black_index].first;
-                            secondary_color_upper_bound = color_bounds[dark_black_index].second;
-                        break;
-                    }
 
                     if(area > bounding_area && aspectRatio < 1 )
                     { 
@@ -261,8 +246,6 @@ int main() {
                         if ( main_color_ratio > main_color_bound && secondary_color_ratio < secondary_color_bound ) {
                             
                             cv::rectangle(frame_1, box, bounds.first, 2);
-                            
-                            //printImg(frame_1,"cones detected so far");
                             cv::Point new_cone = cv::Point( box.x + (box.width / 2), box.y + (box.height / 2) ); // creating the coordinates of the new cones corresponding to the ones of the center of the already drawn box
                             
                             // Storing and classifying the new cone in order to use its coordinates to detect the circuit in the next level
@@ -288,7 +271,7 @@ int main() {
                         }
                     }
                 }
-            }
+            }   
         }
     }
 
@@ -373,15 +356,16 @@ void printImg(cv::Mat to_print, std::string msg)
 
 void processConeMask(cv::Mat& mask, const cv::Mat& kernel_dilate, const cv::Mat& kernel_morph_open, const cv::Mat& kernel_morph_close)
 {
+    /*
+        Classic pipeline for the detection of coloure object of a different shape from the other artifacts in an image
+
+        First we dilate the colors joining closer areas
+        Then we fill the black holes inside white spaces
+        Last, we cut some extra edges and noise
+    */
     cv::dilate(mask, mask, kernel_dilate);
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, kernel_morph_close);
     cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel_morph_open);
-    /*
-    cv::Mat im_floodfill = mask.clone();
-    cv::floodFill(im_floodfill, cv::Point(0, 0), cv::Scalar(255));
-    cv::bitwise_not(im_floodfill, im_floodfill);
-    mask = (mask | im_floodfill);
-    */
 }
 
 
@@ -516,9 +500,3 @@ void pose_estimation()
     std::cout << "Rotation:\n" << R << std::endl;
     std::cout << "Translation:\n" << t << std::endl;
 }
-
-/*
-    TODO:
-
-    Mofifica la parte dove calcoli la percentuale di colore del cono all'interno di una bounding box in maniera dinamica spostandola in una funzione, in maniera tale che, se l'oggetto rispecchia le caratteristiche geometrice, allora viene controllato solo il colore del cono effetivo
-*/

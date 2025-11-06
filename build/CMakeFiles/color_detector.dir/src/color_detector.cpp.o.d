@@ -1,5 +1,5 @@
 CMakeFiles/color_detector.dir/src/color_detector.cpp.o: \
- /mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/src/color_detector.cpp \
+ /home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/src/color_detector.cpp \
  /usr/include/stdc-predef.h /usr/include/opencv4/opencv2/opencv.hpp \
  /usr/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/include/opencv4/opencv2/core.hpp \

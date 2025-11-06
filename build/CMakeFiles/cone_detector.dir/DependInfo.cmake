@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/mnt/c/Users/Betta/Desktop/Personale/Master/Eagle/recruiting_task/src/main.cpp" "CMakeFiles/cone_detector.dir/src/main.cpp.o" "gcc" "CMakeFiles/cone_detector.dir/src/main.cpp.o.d"
+  "/home/seregno/Desktop/Eagle/eagle_cv_recruiting/eagle_cv_recruiting/src/main.cpp" "CMakeFiles/cone_detector.dir/src/main.cpp.o" "gcc" "CMakeFiles/cone_detector.dir/src/main.cpp.o.d"
   )
 
 # Targets to which this target links.
