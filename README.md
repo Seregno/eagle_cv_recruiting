@@ -28,6 +28,7 @@ I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e
         cmake .. make 
         ./cone_detector 
     ``` 
+
 </pre>
 =======
 # SW Driverless – Cone Detection & Track Estimation
@@ -41,7 +42,7 @@ I punti implementati sono i seguenti:
 4. Extraction of Track Edges
 5. Pose Estimation
 
-I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e come esse sono state superate e possibili miglioramenti sono reperibili all'interno del [report tecnico](docs/Technical_Report.pdf).
+I dettagli di come ogni punto è stato implementato, le difficoltà incontrate e come esse sono state superate e possibili miglioramenti sono reperibili all'interno del [report tecnico](doc/Technical_Report.pdf).
 
 ---
 
